@@ -28,7 +28,7 @@ function App() {
       'X-RapidAPI-Host': 'quotel-quotes.p.rapidapi.com'
     },
     body: JSON.stringify({
-      pageSize: 9,
+      pageSize: 6,
       page: getRandomNumber()
     })
   }
@@ -76,13 +76,16 @@ function App() {
 
   //--------------------Render Component----------------------------
   return (
-    <>
+    <div className='container'>
       <h1>Quotes</h1>
       
       <div className='card-container'>
         {quoteCards}
       </div>
-    </>
+
+      <button className='next-button'>Next</button>
+
+    </div>
   )
 }
 
