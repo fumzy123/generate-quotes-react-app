@@ -26,18 +26,11 @@ function App() {
     }
   )
 
-  // Check if the quotesQuery has returned
-  if(quotesQuery.isLoading)
-  {
-    return <h1>Loading...</h1>
-  }
-  if(quotesQuery.isError)
-  {
-    return <pre>{JSON.stringify(quotesQuery.error)}</pre>
-  }
-
-  // ---------------- UseEffect Hook--------------------------------
   
+  // ---------------- UseEffect Hook--------------------------------
+  useEffect(() => {
+    gsap.fromTo(".card-container", {opacity: 0}, {opacity: 1})
+  }, [quotesQuery.data])
 
 
 
@@ -67,20 +60,30 @@ function App() {
     <div className='container'>
 
       <h1>Quotes</h1>
-      
-      <div className='card-container' >
-        {quotesQuery.data.map( (quote, index) => {
-            return <Card
-                      key={index} 
-                      id={index} 
-                      author={quote.name} 
-                      quote={quote.quote} 
-                      onMouseEnter={scaleUp} 
-                      onMouseLeave={scaleDown}
-                    />
+
+      {quotesQuery.isLoading && <h1>Loading...</h1>}
+
+      {quotesQuery.isError && <pre>{JSON.stringify(quotesQuery.error)}</pre> }
+
+      {quotesQuery.isSuccess && 
+        <div className='card-container' >
+          {
+            quotesQuery.data.map( (quote, index) => {
+                return <Card
+                          key={index} 
+                          id={index} 
+                          author={quote.name} 
+                          quote={quote.quote} 
+                          onMouseEnter={scaleUp} 
+                          onMouseLeave={scaleDown}
+                        />
+              }
+            )
           }
-        )}
-      </div>
+        </div>
+      
+      }
+      
       
       <button className='next-button' onClick={getNewQuotes}>Next</button>
 
