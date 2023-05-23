@@ -1,89 +1,88 @@
-import { useEffect, useState } from 'react'
+// Libraries
+import { useEffect, useRef, useState } from 'react'
+import {useQuery, useMutation } from '@tanstack/react-query'
 import { gsap } from 'gsap'
-import './App.css'
 
+
+// Utilities
+import { getQuotes } from './api/quotes'
+import { getRandomNumber } from "./utils/helper"
+
+// Components
 import Card from './components/Card'
 
+// Style sheets
+import './App.css'
+
+
+
 function App() {
-
-  //--------------------State----------------------------
-  const [quotes, setQuotes] = useState([])
-
-  //--------------------Function----------------------------
-  function getRandomNumber(){
-
-    let pageNum =  Math.floor(Math.random() * 10)
-    console.log(pageNum)
-    return pageNum
-  }
-
-  //--------------------Constant Variables----------------------------
-  // Define URL and options parameters for getting a list of Quote https://rapidapi.com/skjaldbaka17/api/quotel-quotes/
-  const url = 'https://quotel-quotes.p.rapidapi.com/quotes/list'
-  const options = {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'X-RapidAPI-Key': '2ad232f86cmsh099647682daab73p14bdd1jsn8bf84f30255e',
-      'X-RapidAPI-Host': 'quotel-quotes.p.rapidapi.com'
-    },
-    body: JSON.stringify({
-      pageSize: 6,
-      page: getRandomNumber()
-    })
-  }
-
-
-
-  //--------------------API Function--------------------------------
-  async function getQuotes(){
-    
-    try {
-      const response = await fetch(url, options);
-      const quoteList = await response.json();
-      setQuotes(quoteList)
-
-      console.log(quoteList);
-    } catch (error) {
-      console.error(error);
+ 
+  // ---------------- UseQuery Hook--------------------------------
+  const quotesQuery = useQuery(
+    {
+      queryKey: ['quotes'],
+      queryFn: () => getQuotes(getRandomNumber()),
     }
+  )
 
+  // Check if the quotesQuery has returned
+  if(quotesQuery.isLoading)
+  {
+    return <h1>Loading...</h1>
+  }
+  if(quotesQuery.isError)
+  {
+    return <pre>{JSON.stringify(quotesQuery.error)}</pre>
   }
 
-  //--------------------Use Effect----------------------------
-  useEffect(() => {
-    getQuotes();
-  }, [])
+  // ---------------- UseEffect Hook--------------------------------
+  
 
-  //--------------------Data Mapping----------------------------
-  const quoteCards = quotes.map((quote, index) => {
-    return (
-      
-      <Card key={index} id={index} author={quote.name} quote={quote.quote} onMouseEnter={scaleUp} onMouseLeave={scaleDown}/>
-    )
-  })
+
+
 
   //--------------------Event Handlers----------------------------
-  function scaleUp({currentTarget}){
+  const scaleUp = ({currentTarget}) => {
     // console.log("Scale up")
-    gsap.to(currentTarget, {scale: 1.1} )
+    gsap.to(currentTarget, {scale: 1.1, duration: 0.1} )
   }
 
-  function scaleDown({currentTarget}){
+  const scaleDown = ({currentTarget}) => {
     // console.log("Scale Down")
-    gsap.to(currentTarget, {scale: 1.0})
+    gsap.to(currentTarget, {scale: 1.0, duration: 0.1})
   }
+
+  const getNewQuotes = () => {
+    quotesQuery.refetch()
+  }
+
+  //--------------------UseRef Hook----------------------------
+  //const cardContainerRef = useRef();
+
+  
 
   //--------------------Render Component----------------------------
   return (
     <div className='container'>
+
       <h1>Quotes</h1>
       
-      <div className='card-container'>
-        {quoteCards}
+      <div className='card-container' >
+        {quotesQuery.data.map( (quote, index) => {
+            return <Card
+                      key={index} 
+                      id={index} 
+                      author={quote.name} 
+                      quote={quote.quote} 
+                      onMouseEnter={scaleUp} 
+                      onMouseLeave={scaleDown}
+                    />
+          }
+        )}
       </div>
-
-      <button className='next-button'>Next</button>
+      
+      <button className='next-button' onClick={getNewQuotes}>Next</button>
 
     </div>
   )
