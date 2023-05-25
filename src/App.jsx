@@ -26,10 +26,19 @@ function App() {
     }
   )
 
+  //--------------------UseRef Hook----------------------------
+  const cardContainerRef = useRef();
   
   // ---------------- UseEffect Hook--------------------------------
   useEffect(() => {
     gsap.fromTo(".card-container", {opacity: 0}, {opacity: 1})
+    gsap.fromTo(".card", {
+      y: 100,
+      duration: 0.5,
+      stagger: 0.1
+    }, {
+      y: 0
+    })
   }, [quotesQuery.data])
 
 
@@ -50,8 +59,7 @@ function App() {
     quotesQuery.refetch()
   }
 
-  //--------------------UseRef Hook----------------------------
-  //const cardContainerRef = useRef();
+
 
   
 
@@ -66,12 +74,11 @@ function App() {
       {quotesQuery.isError && <pre>{JSON.stringify(quotesQuery.error)}</pre> }
 
       {quotesQuery.isSuccess && 
-        <div className='card-container' >
+        <div className='card-container' ref={cardContainerRef} >
           {
             quotesQuery.data.map( (quote, index) => {
                 return <Card
-                          key={index} 
-                          id={index} 
+                          key={index}
                           author={quote.name} 
                           quote={quote.quote} 
                           onMouseEnter={scaleUp} 
